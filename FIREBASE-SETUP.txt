@@ -1,0 +1,82 @@
+SUJAG EDUCATION - GO LIVE GUIDE (FREE, about 15 minutes)
+=========================================================
+The website works right away in DEMO MODE (data is stored only in each visitor's own browser).
+To make logins, mock-test results, subscriptions, papers and blog posts work online for everyone,
+connect a free Firebase project (Spark plan, no credit card needed).
+
+STEP 1 - Create the project
+  1. Go to https://console.firebase.google.com and sign in with Google.
+  2. Click "Add project", name it (e.g. sujag-education), you can turn Google Analytics off, then Create.
+
+STEP 2 - Turn on login
+  1. Build > Authentication > Get started.
+  2. Sign-in method tab: enable "Email/Password" and enable "Google" (choose a support email).
+  3. Settings tab > Authorized domains: add your website domain (for GitHub Pages: yourname.github.io).
+
+STEP 3 - Create the database
+  1. Build > Firestore Database > Create database.
+  2. Choose a location near you, start in PRODUCTION mode.
+  3. Open the "Rules" tab, delete everything, paste the contents of firestore.rules (included in this folder).
+     Replace YOUR_ADMIN_EMAIL@gmail.com with YOUR admin Gmail address. Click Publish.
+     IMPORTANT: sign in as admin with "Continue with Google" (the rules require a verified email).
+
+STEP 4 - Connect the website
+  1. Project settings (gear icon) > General > "Your apps" > click the Web icon (</>) > register the app.
+  2. Copy the firebaseConfig values.
+  3. Open sujag-config.js and paste them into FIREBASE: { ... } (remove the comment markers).
+  4. In the same file set ADMIN_EMAILS: ["your-admin-email@gmail.com"] (same email as in the rules).
+
+STEP 5 - Upload the website
+  Upload ALL files of this folder to your hosting root (GitHub Pages: repository root).
+  Every .html file, plus sujag-config.js.
+
+STEP 6 - First login as admin
+  1. Open yoursite/login.html and choose "Continue with Google" using your admin Gmail.
+  2. Open yoursite/admin.html.
+  3. Settings > "Import starter tests & posts" to add 5 ready-made mock tests and 2 blog posts.
+  4. Settings > set your plan prices and your JazzCash / Easypaisa / bank account details (shown on the Pricing page).
+  5. Add past papers (paste Google Drive links), blog posts and your own mock tests from the tabs.
+     Tick "Free" on the few tests/papers you want everyone with an account to try; the rest are Premium.
+
+HOW PAYMENTS & PREMIUM WORK
+  1. Student picks a plan on the Pricing page, pays you by JazzCash / Easypaisa / bank, and submits the transaction ID.
+  2. Admin Panel > Subscriptions shows the pending request. Check your account, then click Approve.
+  3. Premium is activated for the plan length (renewals add time on top). Reject or Revoke any time.
+  4. You can also grant Premium manually by email (for WhatsApp / cash payments).
+  Premium questions and paper links live in separate protected documents; Firestore rules only release them
+  to Premium members, so students cannot read them without a subscription.
+  NOTE: a Google Drive link that you share as "Anyone with the link" can be forwarded by a paying member.
+  Past papers shown as Preview/Download are only as private as that Drive link. Mock tests are fully protected.
+
+HOW STUDENT DATA REACHES YOU
+  When a student takes a mock test, the score, answers and time are saved to Firebase.
+  Admin Panel > Results shows every attempt; Admin Panel > Users shows every registered student.
+  Both can be exported to CSV (opens in Excel).
+
+PAST PAPERS WITH GOOGLE DRIVE
+  Upload the PDF to Google Drive > Share > "Anyone with the link" > Viewer > Copy link.
+  Admin Panel > Past Papers > Add > paste the link. Premium students get Preview and Download buttons.
+  Folder links also work (they open in Drive).
+
+BULK-ADDING QUESTIONS
+  Admin Panel > Mock Tests > Add (or Edit) > "Bulk import". Paste questions like:
+     Q: What is the capital of Pakistan?
+     A) Karachi
+     B) Lahore
+     C) Islamabad
+     D) Peshawar
+     Answer: C
+     Explain: Islamabad is the capital.
+  (Leave a blank line between questions.)
+
+FREE LIMITS (Spark plan, generous for a start)
+  Firestore: 50,000 reads and 20,000 writes per day. Authentication: free for email and Google sign-in.
+
+DEMO MODE (before Firebase)
+  Demo admin login: admin@sujag.demo / admin123 (works only in demo mode, only in your browser).
+  Demo jobs and papers are samples. They disappear once Firebase is connected.
+
+SECURITY NOTES
+  - The Firebase apiKey in sujag-config.js is meant to be public. The rules protect your data.
+  - Only emails listed in the rules can change content or see all users and results.
+  - Never share your admin Google account.

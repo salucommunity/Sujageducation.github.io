@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // >>> Put YOUR admin Gmail here (lowercase). Add more with ||
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in ['YOUR_ADMIN_EMAIL@gmail.com'];
+    }
+    function signedIn() { return request.auth != null; }
+    function isPremium() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/subs/$(request.auth.uid))
+        && get(/databases/$(database)/documents/subs/$(request.auth.uid)).data.expiresAt > request.time.toMillis();
+    }
+
+    // Public catalogue (titles, categories, free/premium flag) - no private content here
+    match /tests/{id}    { allow read: if true; allow write: if isAdmin(); }
+    match /papers/{id}   { allow read: if true; allow write: if isAdmin(); }
+    match /posts/{id}    { allow read: if true; allow write: if isAdmin(); }
+    match /config/{id}   { allow read: if true; allow write: if isAdmin(); }
+
+    // Private content: questions and Drive links. Free items need login, premium items need an active plan.
+    match /testQuestions/{id} {
+      allow read: if isAdmin() || isPremium()
+        || (signedIn() && get(/databases/$(database)/documents/tests/$(id)).data.free == true);
+      allow write: if isAdmin();
+    }
+    match /paperLinks/{id} {
+      allow read: if isAdmin() || isPremium()
+        || (signedIn() && get(/databases/$(database)/documents/papers/$(id)).data.free == true);
+      allow write: if isAdmin();
+    }
+
+    // Subscriptions: only the admin can grant. Users can read their own.
+    match /subs/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // Payment requests: a user can submit a pending request for themselves; only admin can approve/reject.
+    match /payments/{id} {
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid && request.resource.data.status == 'pending';
+      allow read: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+
+    match /users/{uid} {
+      allow read, write: if signedIn() && (request.auth.uid == uid || isAdmin());
+    }
+
+    match /results/{id} {
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow read: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+  }
+}
